@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+cd terraform
+
+# Clean local terraform history
+rm -rf .terraform terraform.tfstate*
+
+terraform init -backend-config="key=statuspage/terraform.tfstate"
+
+export LIBRATO_TOKEN=$(vault read -field token secret/librato)
+
+terraform apply \
+  -var "librato_token=${LIBRATO_TOKEN}" \
+  -backup "-"
